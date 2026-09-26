@@ -1,14 +1,11 @@
 from stack import Stack
-from brackets_validation import validate_brackets
-
+import re
 
 def evaluate_expression(expression: str) -> float:
     if not isinstance(expression, str):
         raise TypeError("This function takes string argument only")
-    if not validate_brackets(expression):
-        raise ValueError("Expression brackets are unbalanced")
 
-    tokens = expression.split()
+    tokens = re.findall(r"\d+(?:\.\d+)?|[()+*/-]", expression)
 
     numbers_stack = Stack()
     operators_stack = Stack()
@@ -83,5 +80,4 @@ def evaluate_expression(expression: str) -> float:
 
     return result
 
-
-print(evaluate_expression("( 2 + 3 ) * 2"))
+print(evaluate_expression("(2 + 2) * 2"))
