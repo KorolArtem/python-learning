@@ -1,6 +1,6 @@
 from algorithms_and_data_structures.stack.stack import Stack
 
-def validate_palindrome(word: str | list[str]):
+def validate_palindrome(word: str | list[str]) -> bool:
 
     if not word: raise ValueError("The word must have at least one symbol")
     

@@ -1,6 +1,6 @@
 from algorithms_and_data_structures.stack.stack import Stack
 
-def validate_brackets(brackets_sequence: str | list[str]):
+def validate_brackets(brackets_sequence: str | list[str]) -> bool:
 
     if isinstance(brackets_sequence, str):
         brackets_sequence = list(brackets_sequence)

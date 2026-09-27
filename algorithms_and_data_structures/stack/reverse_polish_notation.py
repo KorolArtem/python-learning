@@ -1,6 +1,6 @@
 from algorithms_and_data_structures.stack.stack import Stack
 
-def calculate_expression(expression: str | list[str]):
+def calculate_expression(expression: str | list[str]) -> float:
     
     if isinstance(expression, str):
         normalized = expression.replace(",", " ").split()
