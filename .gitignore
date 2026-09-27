@@ -1,7 +1,15 @@
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+
+.pytest_cache/
+
+.vscode/
+.idea/
+
+.coverage
+htmlcov/
+*.log
 
 venv/
 .venv/

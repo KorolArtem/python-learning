@@ -1,4 +1,4 @@
-from stack import Stack
+from algorithms_and_data_structures.stack.stack import Stack
 import re
 
 def evaluate_expression(expression: str) -> float:
@@ -79,5 +79,3 @@ def evaluate_expression(expression: str) -> float:
         raise ValueError("Expression is wrong")
 
     return result
-
-print(evaluate_expression("(2 + 2) * 2"))

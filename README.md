@@ -1,2 +1,1 @@
-# python-learning
-Python learning
+## Testing myself with small tasks and learning Python little by little.

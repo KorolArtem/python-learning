@@ -1,4 +1,4 @@
-from stack import Stack
+from algorithms_and_data_structures.stack.stack import Stack
 
 def calculate_expression(expression: str | list[str]):
     
@@ -33,7 +33,7 @@ def calculate_expression(expression: str | list[str]):
                     raise ZeroDivisionError("Division by zero")
                 stack.push(int(a / b))
 
-        elif isinstance(item, int) or isinstance(item, str) and item.isdigit():
+        elif isinstance(item, int) or isinstance(item, str) and item.removeprefix("-").removeprefix("+").isdigit():
             stack.push(int(item))
         else:
             raise TypeError(f"Unexpected element in expression: {item}")

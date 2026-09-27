@@ -1,4 +1,4 @@
-from stack import Stack
+from algorithms_and_data_structures.stack.stack import Stack
 
 def validate_palindrome(word: str | list[str]):
 
