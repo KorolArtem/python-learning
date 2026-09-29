@@ -1,6 +1,6 @@
 from algorithms_and_data_structures.linked_list.linked_list import LinkedList
 
-def reverse_linked_list(linked_list: LinkedList):
+def reverse_linked_list(linked_list: LinkedList) -> LinkedList:
     if len(linked_list) == 0: 
         return linked_list
 
