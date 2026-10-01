@@ -52,7 +52,7 @@ def test_contains(empty_list, single_list, populated_list):
     assert 99 not in populated_list
 
 def test_repr(empty_list, single_list, populated_list):
-    assert repr(empty_list) in ("None")
+    assert repr(empty_list) == "None"
     assert repr(single_list) == "67 -> None"
     assert repr(populated_list) == "10 -> 20 -> 30 -> 40 -> 50 -> None"
 

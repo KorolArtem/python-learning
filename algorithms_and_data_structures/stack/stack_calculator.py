@@ -5,7 +5,7 @@ def evaluate_expression(expression: str) -> float:
     if not isinstance(expression, str):
         raise TypeError("This function takes string argument only")
 
-    tokens = re.findall(r"\d+(?:\.\d+)?|[()+*/-]", expression)
+    tokens = re.findall(r"\d+(?:\.\d+)?|\S", expression)
 
     numbers_stack = Stack()
     operators_stack = Stack()
@@ -68,6 +68,8 @@ def evaluate_expression(expression: str) -> float:
             raise ValueError(f"'{token}' is unsupported")
 
     while not operators_stack.is_empty():
+        if operators_stack.top() == "(":
+            raise ValueError("Mismatched brackets")
         apply_operator()
 
     if numbers_stack.is_empty():

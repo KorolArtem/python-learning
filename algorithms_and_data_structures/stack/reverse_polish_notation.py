@@ -12,7 +12,7 @@ def calculate_expression(expression: str | list[str]) -> float:
     stack = Stack()
 
     for item in normalized:
-        if isinstance(item, str) and item in "+-*/":
+        if item in ("+", "-", "*", "/"):
             
             if stack.is_empty():
                 raise ValueError(f"The expression is incorrect")
