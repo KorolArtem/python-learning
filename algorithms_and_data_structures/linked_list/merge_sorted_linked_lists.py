@@ -32,18 +32,3 @@ def merge_sorted_linked_lists(a: LinkedList[T], b: LinkedList[T]) -> LinkedList[
                 b_next = b_next.next
 
     return result
-
-if __name__ == "__main__":
-    a = LinkedList()
-    # a.append(1)
-    # a.append(5)
-    # a.append(9)
-
-    b = LinkedList()
-    b.append(3)
-    b.append(4)
-    b.append(6)
-    b.append(8)
-
-    r = merge_sorted_linked_lists(a, b)
-    print(r)
