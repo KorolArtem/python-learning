@@ -1,19 +1,17 @@
-from typing import Any
-
 #Default stack
-class Stack:
+class Stack[T]: # I only just found out they added that syntactic sugar in the new versions.
 
     def __init__(self) -> None:
-        self._stack = []
+        self._stack: list[T] = []
 
-    def push(self, item: Any) -> None:
+    def push(self, item: T) -> None:
         self._stack.append(item)
 
-    def top(self) -> Any:
+    def top(self) -> T:
         if self._stack: return self._stack[-1]
         else: raise IndexError("This stack is empty")
 
-    def pop(self) -> Any:
+    def pop(self) -> T:
         if self._stack: return self._stack.pop()
         else: raise IndexError("This stack is empty")
 
