@@ -21,7 +21,7 @@ class HashMap[K,V]:
                 
                 raise TypeError(f"Invalid argument type. Expected: {expected_names}, got: {actual_name} (value={value})")
 
-    def __init__(self, initial_capacity: int = 8, load_factor: float = 0.75, resize_multiplier: float | int = 2.0) -> None:
+    def __init__(self, initial_capacity: int = 8, load_factor: float = 0.75, shrink_factor: float = -1, resize_multiplier: float | int = 2.0, resize_divider: float | int = 2) -> None:
 
         self._check_arg_types(
             (initial_capacity, (int,)), 
@@ -34,14 +34,28 @@ class HashMap[K,V]:
             raise ValueError(f"Invalid load_factor ({load_factor}). load_factor must be strictly between 0.1 and 1")
         if not (1.1 < resize_multiplier):
             raise ValueError(f"Invalid resize_multiplier ({resize_multiplier}). resize_multiplier must be greater than 1.1")
+        if shrink_factor < 0:
+            self.__shrink_factor = load_factor / 4
+        elif not (0.025 < shrink_factor < 0.25):
+            raise ValueError(f"Invalid shrink_factor ({shrink_factor}). shrink_factor must be strictly between 0.025 and 0.25")
+        else:
+            self.__shrink_factor = shrink_factor
+        if not (1.1 < resize_divider):
+            raise ValueError(f"Invalid resize_divider ({resize_divider}). resize_divider must be greater than 1.1")
+
+        if self.__shrink_factor * resize_divider >= load_factor:
+            raise ValueError("(shrink_factor * resize_divider) must be less than load_factor, otherwise the map would rebuild itself on almost every operation")
 
         self.__load_factor = load_factor
         self.__resize_multiplier = resize_multiplier
+        self.__resize_divider = resize_divider
         self._size = 0
+        self.__initial_capacity = initial_capacity
 
         self._buckets: list[_HashNode[K, V] | None] = [None] * initial_capacity
 
-        self.__threshold = int(initial_capacity * load_factor)
+        self.__expand_threshold = int(initial_capacity * load_factor)
+        self.__shrink_threshold = -1
 
     def _find_bucket_index(self, key: K, buckets: list[_HashNode[K, V] | None] | None = None) -> int:
 
@@ -73,7 +87,7 @@ class HashMap[K,V]:
     
         bucket_index = self._find_bucket_index(key=key, buckets=buckets)
 
-        if buckets[bucket_index]: # first node exists
+        if buckets[bucket_index]:
 
             current_node = buckets[bucket_index]
             while current_node:
@@ -87,18 +101,37 @@ class HashMap[K,V]:
             current_node.next = _HashNode(key=key, value=value)
             return True
 
-        else: # first node doesnt exist
+        else:
             buckets[bucket_index] = _HashNode(key=key, value=value)
             return True
 
-    def _resize_and_rehash(self):
+    def _resize_and_rehash(self, elements_count_delta: int) -> None:
 
-        new_capacity = int(len(self._buckets) * self.__resize_multiplier)
-        new_capacity = new_capacity if new_capacity > len(self._buckets) else len(self._buckets) + 1 # to prevent invinity cycle
+        if not isinstance(elements_count_delta, int):
+            raise TypeError(f"elements_count_delta must be an int, got {type(elements_count_delta)}")
+
+        self._size += elements_count_delta
+
+        current_capacity = len(self._buckets)
+        new_capacity = current_capacity
+
+        if self._size >= self.__expand_threshold:
+            new_capacity = max( (current_capacity + 1), (int(current_capacity * self.__resize_multiplier)) ) 
+
+        elif self._size <= self.__shrink_threshold and current_capacity > self.__initial_capacity:
+            new_capacity = max(self.__initial_capacity, int(current_capacity / self.__resize_divider))
+
+        if new_capacity == current_capacity:
+            return
+
+        self.__expand_threshold = int(new_capacity * self.__load_factor)
+
+        if new_capacity > self.__initial_capacity:
+            self.__shrink_threshold = int(new_capacity * self.__shrink_factor)
+        else:
+            self.__shrink_threshold = -1
 
         new_buckets = [None] * new_capacity
-
-        self.__threshold = int(new_capacity * self.__load_factor)
 
         for head in self._buckets:
             if head is None:
@@ -113,9 +146,7 @@ class HashMap[K,V]:
     def __setitem__(self, key: K, value: V) -> None:
 
         if self.__insert(key=key, value=value):
-            self._size += 1
-            if self._size >= self.__threshold:
-                self._resize_and_rehash()
+            self._resize_and_rehash(1)
 
     def __getitem__(self, key: K) -> V:
 
@@ -127,7 +158,7 @@ class HashMap[K,V]:
 
         raise KeyError(f"Key ({key}) was not found in HashMap")
 
-    def __delitem__(self, key: K) -> None: # TODO: downsizing (shrink and rehash)
+    def __delitem__(self, key: K) -> None:
 
         bucket_index = self._find_bucket_index(key=key)
         current_node = self._buckets[bucket_index]
@@ -135,13 +166,13 @@ class HashMap[K,V]:
         if current_node:
             if current_node.key == key:
                 self._buckets[bucket_index] = current_node.next
-                self._size -= 1
+                self._resize_and_rehash(-1)
                 return
 
             while current_node.next:
                 if current_node.next.key == key:
                     current_node.next = current_node.next.next
-                    self._size -= 1
+                    self._resize_and_rehash(-1)
                     return
                 current_node = current_node.next
 

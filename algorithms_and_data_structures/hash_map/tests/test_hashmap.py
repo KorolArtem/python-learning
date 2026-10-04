@@ -290,3 +290,98 @@ def test_matches_dict_on_random_operations():
         assert len(h) == len(ref)
 
     assert dict(h.items()) == ref
+
+def test_invalid_shrink_params():
+    
+    with pytest.raises(ValueError, match="shrink_factor"):
+        HashMap(shrink_factor=0.5)
+    
+    with pytest.raises(ValueError, match="shrink_factor"):
+        HashMap(shrink_factor=0.01)
+
+    with pytest.raises(ValueError, match="resize_divider"):
+        HashMap(resize_divider=1.0)
+
+def test_capacity_expands_and_shrinks():
+    
+    h = HashMap(initial_capacity=8, load_factor=0.75, resize_multiplier=2.0, resize_divider=2.0)
+    
+    assert len(h._buckets) == 8
+    
+    for i in range(100):
+        h[i] = i
+        
+    assert len(h) == 100
+    assert len(h._buckets) >= 128
+    max_capacity = len(h._buckets)
+    
+    for i in range(98):
+        del h[i]
+        
+    assert len(h) == 2
+    
+    assert len(h._buckets) < max_capacity
+    assert len(h._buckets) == 8
+
+def test_never_shrinks_below_initial_capacity():
+    
+    h = HashMap(initial_capacity=64)
+    assert len(h._buckets) == 64
+    
+    for i in range(10):
+        h[i] = i
+        
+    for i in range(10):
+        del h[i]
+        
+    assert len(h) == 0
+    
+    assert len(h._buckets) == 64
+
+def test_custom_shrink_and_divider():
+    
+    h = HashMap(
+        initial_capacity=10, 
+        load_factor=0.8, 
+        shrink_factor=0.2, 
+        resize_multiplier=2, 
+        resize_divider=3
+    )
+    
+    for i in range(25):
+        h[i] = str(i)
+        
+    expanded_capacity = len(h._buckets)
+    assert expanded_capacity >= 40 
+    
+    for i in range(18):
+        del h[i]
+        
+    assert len(h) == 7
+    
+    assert len(h._buckets) == 13
+
+def test_params_that_would_rebuild_on_every_operation_are_rejected():
+    with pytest.raises(ValueError, match="shrink_factor"):
+        HashMap(load_factor=0.4, shrink_factor=0.24)
+
+def test_dynamic_fuzz_resizing():
+    h = HashMap(initial_capacity=4)
+    
+    for i in range(50):
+        h[i] = i
+    assert len(h._buckets) > 4
+    
+    for i in range(0, 50, 2):
+        del h[i]
+    
+    for i in range(1, 50, 2):
+        assert h[i] == i
+
+    for i in range(50, 100):
+        h[i] = i
+        
+    for i in range(1, 100, 2):
+        del h[i]
+        
+    assert len(h) == 25
