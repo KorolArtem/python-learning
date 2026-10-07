@@ -160,7 +160,7 @@ class BinarySearchTree[T: (int, float)]:
 
         return self._find_min_node(self.root).value
 
-    def find_max[D](self, default=_MISSING) -> T | D:
+    def find_max[D](self, default: D =_MISSING) -> T | D:
         if self.is_empty():
             return self._handle_empty(default, "cannot find maximum in an empty BST")
 
