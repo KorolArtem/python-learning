@@ -183,3 +183,42 @@ def test_matches_python_list_on_random_operations():
         assert len(bst) == len(ref_list)
 
     assert list(bst) == sorted(ref_list)
+
+def test_constructor_with_various_iterables():
+    tree_list = BinarySearchTree([5, 3, 7])
+    assert list(tree_list) == [3, 5, 7]
+
+    tree_range = BinarySearchTree(range(3))
+    assert list(tree_range) == [0, 1, 2]
+
+    tree_generator = BinarySearchTree(x * 0.5 for x in range(3))
+    assert list(tree_generator) == [0.0, 0.5, 1.0]
+
+    with pytest.raises(TypeError):
+        BinarySearchTree([1, "invalid", 3])
+
+
+def test_insert_invalid_values(empty_tree):
+    with pytest.raises(ValueError):
+        empty_tree.insert(None)
+
+    with pytest.raises(TypeError):
+        empty_tree.insert("string")
+
+    with pytest.raises(TypeError):
+        empty_tree.insert(True)
+
+
+def test_contains_invalid_types(bst):
+    assert "string" not in bst
+    assert None not in bst
+    assert True not in bst
+    assert False not in bst
+
+
+def test_remove_and_discard_invalid_types(bst):
+    with pytest.raises(TypeError):
+        bst.remove("invalid_type")
+
+    with pytest.raises(TypeError):
+        bst.discard(True)

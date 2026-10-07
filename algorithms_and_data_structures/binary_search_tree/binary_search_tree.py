@@ -1,5 +1,5 @@
 from typing import Any
-from collections.abc import Iterator
+from collections.abc import Iterator, Iterable
 
 _MISSING = object()
 
@@ -14,16 +14,20 @@ class _TreeNode[T: (int, float)]:
         self.right_child: _TreeNode[T] | None = right_child 
 
 class BinarySearchTree[T: (int, float)]:
-    def __init__(self) -> None:
+    def __init__(self, iterable: Iterable[T] | None = None) -> None:
         self.root: _TreeNode[T] | None = None
         self._size: int = 0
+
+        if iterable is not None:
+            for item in iterable:
+                self.insert(item)
 
     def _validate(self, *values: Any) -> None:
         for val in values:
             if not isinstance(val, (int, float)) or isinstance(val, bool):
                 raise TypeError(f"BST value must be int or float, got ({type(val)})")
 
-    def _insert_recursive(self, current_node: _TreeNode[T], value: T) -> None:
+    def _insert_recursive(self, current_node: _TreeNode[T], value: T) -> _TreeNode[T] | None:
         if current_node is None:
             return _TreeNode(value)
 
@@ -130,8 +134,11 @@ class BinarySearchTree[T: (int, float)]:
         return self.root is not None
 
     def __contains__(self, value: T) -> bool:
-        self._validate(value)
-        return self._get_node_recursive(self.root, value) is not None
+        try:
+            self._validate(value)
+            return self._get_node_recursive(self.root, value) is not None
+        except TypeError:
+            return False
 
     def __len__(self) -> int:
         return self._size
@@ -147,25 +154,27 @@ class BinarySearchTree[T: (int, float)]:
     def is_empty(self) -> bool:
         return not self
 
-    def find_min(self, default=_MISSING) -> T:
+    def find_min[D](self, default: D =_MISSING) -> T | D:
         if self.is_empty():
             return self._handle_empty(default, "cannot find minimum in an empty BST")
 
         return self._find_min_node(self.root).value
 
-    def find_max(self, default=_MISSING) -> T:
+    def find_max[D](self, default=_MISSING) -> T | D:
         if self.is_empty():
             return self._handle_empty(default, "cannot find maximum in an empty BST")
 
         return self._find_max_node(self.root).value
 
     def remove(self, value: T) -> None:
+        self._validate(value)
         self.root, is_deleted = self._remove_node_recursive(self.root, value)
         if not is_deleted:
             raise KeyError(f"{value} was not found in the BST")
         self._size -= 1
 
     def discard(self, value: T) -> bool:
+        self._validate(value)
         self.root, is_deleted = self._remove_node_recursive(self.root, value)
         if is_deleted:
             self._size -= 1
