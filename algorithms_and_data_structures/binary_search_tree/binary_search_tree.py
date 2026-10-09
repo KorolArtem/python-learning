@@ -1,5 +1,6 @@
 from typing import Any
 from collections.abc import Iterator, Iterable
+from algorithms_and_data_structures.two_stacks_queue.two_stacks_queue import Queue
 
 _MISSING = object()
 
@@ -27,7 +28,7 @@ class BinarySearchTree[T: (int, float)]:
             if not isinstance(val, (int, float)) or isinstance(val, bool):
                 raise TypeError(f"BST value must be int or float, got ({type(val)})")
 
-    def _insert_recursive(self, current_node: _TreeNode[T], value: T) -> _TreeNode[T] | None:
+    def _insert_recursive(self, current_node: _TreeNode[T] | None, value: T) -> _TreeNode[T] | None:
         if current_node is None:
             return _TreeNode(value)
 
@@ -40,7 +41,7 @@ class BinarySearchTree[T: (int, float)]:
 
         return current_node
 
-    def _get_node_recursive(self, current_node: _TreeNode[T], value: T) -> _TreeNode[T] | None:
+    def _get_node_recursive(self, current_node: _TreeNode[T] | None, value: T) -> _TreeNode[T] | None:
         if current_node is None:
             return
 
@@ -179,3 +180,36 @@ class BinarySearchTree[T: (int, float)]:
         if is_deleted:
             self._size -= 1
         return is_deleted
+
+    def levelOrder(self) -> Iterator[T]:
+        if self.root is None:
+            return
+
+        queue: Queue[_TreeNode[T]] = Queue(self.root)
+
+        while queue:
+            node = queue.dequeue()
+
+            for _ in range(node.count):
+                yield node.value
+
+            if node.left_child is not None:
+                queue.enqueue(node.left_child)
+
+            if node.right_child is not None:
+                queue.enqueue(node.right_child)
+
+    def _validate_node_recursive(self, node: _TreeNode[T] | None, lower: T | None = None, upper: T | None = None) -> bool:
+        if node is None:
+            return True
+
+        if lower is not None and node.value <= lower:
+            return False
+
+        if upper is not None and node.value >= upper:
+            return False
+
+        return self._validate_node_recursive(node.left_child, lower, node.value) and self._validate_node_recursive(node.right_child, node.value, upper)
+
+    def is_valid_bst(self) -> bool:
+        return self._validate_node_recursive(self.root)

@@ -222,3 +222,51 @@ def test_remove_and_discard_invalid_types(bst):
 
     with pytest.raises(TypeError):
         bst.discard(True)
+
+def test_level_order_empty(empty_tree):
+    assert list(empty_tree.levelOrder()) == []
+
+def test_level_order_populated():
+    tree = BinarySearchTree()
+    for val in [10, 5, 15, 3, 7, 12, 18]:
+        tree.insert(val)
+        
+    assert list(tree.levelOrder()) == [10, 5, 15, 3, 7, 12, 18]
+
+def test_level_order_with_duplicates():
+    tree = BinarySearchTree()
+    for val in [10, 10, 5, 15, 15, 15]:
+        tree.insert(val)
+        
+    assert list(tree.levelOrder()) == [10, 10, 5, 15, 15, 15]
+
+def test_level_order_unbalanced():
+    tree = BinarySearchTree()
+    for val in [1, 2, 3, 4, 5]:
+        tree.insert(val)
+        
+    assert list(tree.levelOrder()) == [1, 2, 3, 4, 5]
+
+def test_is_valid_bst_on_correct_trees(empty_tree, bst, dup_bst):
+    assert empty_tree.is_valid_bst() is True
+    assert bst.is_valid_bst() is True
+    assert dup_bst.is_valid_bst() is True
+
+def test_is_valid_bst_corrupted_basic():
+    tree = BinarySearchTree()
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    
+    tree.root.left_child.value = 99
+    
+    assert tree.is_valid_bst() is False
+
+def test_is_valid_bst_corrupted_deep_bounds():
+    tree = BinarySearchTree()
+    for val in [10, 5, 15, 3, 7]:
+        tree.insert(val)
+        
+    tree.root.left_child.right_child.value = 11
+    
+    assert tree.is_valid_bst() is False

@@ -3,10 +3,16 @@ from collections.abc import Iterator # Okay, typing is outdated, I know this now
 
 class Queue[T]:
 
-    def __init__(self) -> None:
+    def __init__(self, data: list[T] | T | None = None) -> None:
 
         self._in_stack : Stack[T] = Stack()
         self._out_stack : Stack[T] = Stack()
+
+        if data is not None:
+            items = data if isinstance(data, list) else [data]
+
+            for item in items:
+                self.enqueue(item)
 
     def enqueue(self, item: T) -> None:
 
@@ -43,6 +49,10 @@ class Queue[T]:
     def __len__(self) -> int:
 
         return len(self._in_stack) + len(self._out_stack)
+
+    def __bool__(self) -> bool:
+
+        return len(self) > 0
 
     def __iter__(self) -> Iterator[T]:
 
